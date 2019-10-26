@@ -5,6 +5,6 @@ return [
         'host' => 'localhost',
         'user' => 'root',
         'password' => 'root',
-        'db' => 'synergy'
+        'db' => 'synergy_test'
     ]
 ];
