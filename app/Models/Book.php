@@ -36,4 +36,10 @@ class Book extends Model {
 
         return $newBook;
     }
+
+    public function getAuthors($id) {
+        $authors = $this->belongsToMany(\App\Models\Author::class, $id);
+
+        return $authors;
+    }
 }

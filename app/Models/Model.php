@@ -14,7 +14,6 @@ abstract class Model {
 
     private $belongsToMany;
     private $hasMany;
-    private $relatedKey;
 
     public function __construct() {
         $this->connection = DB::getConnection();
@@ -79,7 +78,7 @@ abstract class Model {
             'id' => $id
         ]);
 
-        return $result->fetchAll(2)[0];
+        return $result->fetchAll(PDO::FETCH_ASSOC)[0];
     }
 
     protected function delete($id) {
@@ -125,6 +124,20 @@ abstract class Model {
         else $newItem = false;
 
         return $newItem;
+    }
+
+    protected function belongsToMany($class, $recordId, $related_table = null, $related_key = null) {
+        if(is_null($related_table)) {
+            $related_table = sprintf('%s_%s', $class->table, $this->table); //TODO: add 's' to end of each tables name
+        }
+
+        if(is_null($related_key)) {
+            $related_key = sprintf('%s_id', rtrim($this->table, 's'));
+        }
+
+        $result = $this->query(sprintf("SELECT * FROM `%s` WHERE `%s` = %d", $related_table, $related_key, $recordId));
+
+        return $result->fetchAll(PDO::FETCH_ASSOC);
     }
 
     private function getTableName() {
