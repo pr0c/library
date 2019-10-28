@@ -6,24 +6,40 @@ use App\Models\Book;
 use Core\Request;
 
 class BookController extends Controller {
-    public static function getBooks(Request $request) {
-        $request = $request->getParams();
+    public static function getBooks() {
         $book = new Book();
+        $books = $book->getBooks();
 
-        $page = $request['page'] ?: 0;
-        $perPage = $request['perPage'] ?: 10;
-
-        $books = $book->getBooks($page, $perPage);
-
-        echo json_encode($books);
+        return $books;
     }
 
-    public static function getBook(Request $request) {
+    public static function getBook($id) {
+        $book = new Book();
+
+        return $book->getBook($id);
+    }
+
+    public static function addBook(Request $request) {
         $request = $request->getParams();
         $book = new Book();
 
-        if(isset($request['id'])) {
-            echo json_encode($book->getBook($request['id']));
-        }
+        $newBook = $book->addBook($request);
+
+        return $newBook;
+    }
+
+    public static function deleteBook($id) {
+        $book = new Book();
+        $result = $book->deleteBook($id);
+
+        return $result;
+    }
+
+    public static function updateBook($id, $bookFields) {
+        $book = new Book();
+
+        $result = $book->updateBook($id, $bookFields);
+
+        return $result;
     }
 }

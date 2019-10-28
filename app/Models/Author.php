@@ -6,36 +6,28 @@ class Author extends Model {
     protected $fillable = ['name'];
 
     public function addAuthor(array $fields) {
-        $result = $this->insert($fields);
-
-        return $result;
+        return $this->insert($fields);
     }
 
-    public function getAuthors($page = 0, $perPage = 10) {
-        $authors = $this->get($page, $perPage);
-
-        return $authors;
+    public function getAuthors() {
+        return $this->get();
     }
 
     public function getAuthor($id) {
-        $author = $this->find($id);
-
-        return $author;
+        return $this->find($id);
     }
 
     public function deleteAuthor($id) {
-        $result = $this->delete($id);
-
-        return $result;
+        return $this->delete($id);
     }
 
-    public function updateAuthor($author, $id) {
-        $result = $this->update($author, $id);
-
-        return $result;
+    public function updateAuthor($id, $author) {
+        return $this->update($author, $id);
     }
 
     public function getBooks($id) {
         $books = $this->belongsToMany(Book::class, $id, 'authors_books');
+
+        return $books;
     }
 }

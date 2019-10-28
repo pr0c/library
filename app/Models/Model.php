@@ -22,10 +22,14 @@ abstract class Model {
 
     protected function insert($fields) {
         $values = "";
-        for($i = 0; $i < count($fields); $i++) {
-            $fields[$i] = $this->connection->quote($fields[$i]);
-            if($i == 0) $values .= $fields[$i];
-            else $values .= ", " . $fields[$i];
+
+        $i = 0;
+        foreach($fields as $key => $value) {
+            $value = $this->connection->quote($value);
+            if($i == 0) $values .= $value;
+            else $values .= ", " . $value;
+
+            $i++;
         }
 
         if(!is_null($this->fillable)) {
@@ -128,7 +132,7 @@ abstract class Model {
 
     protected function belongsToMany($class, $recordId, $related_table = null, $related_key = null) {
         if(is_null($related_table)) {
-            $related_table = sprintf('%s_%s', $class->table, $this->table); //TODO: add 's' to end of each tables name
+            $related_table = sprintf('%s_%s', $class->table, $this->table);
         }
 
         if(is_null($related_key)) {
@@ -136,8 +140,15 @@ abstract class Model {
         }
 
         $result = $this->query(sprintf("SELECT * FROM `%s` WHERE `%s` = %d", $related_table, $related_key, $recordId));
+        $result = $result->fetchAll(PDO::FETCH_ASSOC);
 
-        return $result->fetchAll(PDO::FETCH_ASSOC);
+        $records = [];
+        foreach($result as $id) {
+            $tmp = $this->query(sprintf("SELECT * FROM `%s` WHERE `%s` = %d", $class->table, $class->primary_key, $id));
+            $records[] = $tmp->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return $records;
     }
 
     private function getTableName() {

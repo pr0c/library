@@ -1,5 +1,7 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+
 require('vendor/autoload.php');
 require('app/routes.php');
 
