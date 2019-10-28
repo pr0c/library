@@ -2,7 +2,7 @@
 
 namespace Core;
 
-class Request implements IRequest {
+class Request {
     public function __construct() {
         $this->bootstrapSelf();
     }
@@ -10,15 +10,50 @@ class Request implements IRequest {
     public function getParams() {
         if($this->requestMethod === "GET")
         {
-            return;
+            $params = [];
+            $pattern = $this->resolveRoute($_SERVER['REQUEST_URI']);
+            $params = [
+                'id' => $pattern[2] ?: null
+            ];
+            return $params;
         }
-        if ($this->requestMethod === "POST")
+        else if ($this->requestMethod === "POST")
         {
-            $params = array();
+            $params = [];
+
             foreach($_POST as $key => $value)
             {
                 $params[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
             }
+
+            $pattern = $this->resolveRoute($_SERVER['REQUEST_URI']);
+            if($pattern[2]) {
+                $params['id'] = $pattern[2];
+            }
+
+            return $params;
+        }
+        else if($this->requestMethod == "DELETE") {
+            $params = [];
+            $pattern = $this->resolveRoute($_SERVER['REQUEST_URI']);
+            $params = [
+                'id' => $pattern[2] ?: null
+            ];
+            return $params;
+        }
+        else if($this->requestMethod == "PATCH") {
+            $params = [];
+
+            foreach($_POST as $key => $value)
+            {
+                $params[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
+            }
+
+            $pattern = $this->resolveRoute($_SERVER['REQUEST_URI']);
+            if($pattern[2]) {
+                $params['id'] = $pattern[2];
+            }
+
             return $params;
         }
     }
@@ -39,5 +74,12 @@ class Request implements IRequest {
             $result = str_replace($match, $c, $result);
         }
         return $result;
+    }
+
+    private function resolveRoute($uri) {
+        $matches = [];
+        preg_match('/\/(\w+)\/(\d+)/', $uri, $matches);
+
+        return $matches;
     }
 }

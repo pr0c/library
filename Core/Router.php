@@ -4,10 +4,7 @@ namespace Core;
 
 class Router {
     private $request;
-    private $supportedHttpMethods = [
-        "GET",
-        "POST"
-    ];
+    private $route;
 
     public function __construct(Request $request) {
         $this->request = $request;
@@ -15,27 +12,39 @@ class Router {
 
     public function __call($name, $arguments) {
         list($route, $method) = $arguments;
-        if(!in_array(strtoupper($name), $this->supportedHttpMethods))
-        {
-            $this->invalidMethodHandler();
+
+        $pattern = $this->generateRegex($route);
+
+        $this->{strtolower($name)}[$this->formatRoute($route)] = [
+            'method' => $method,
+            'params' => $pattern
+        ];
+    }
+
+    public function resolve() {
+        $methodDictionary = $this->{strtolower($this->request->requestMethod)};
+        $formattedRoute = $this->formatRoute($this->request->requestUri);
+
+        if(!isset($methodDictionary[$formattedRoute])) {
+            $parsedRoute = $this->resolveRoute($formattedRoute);
+
+            foreach($methodDictionary as $dict) {
+                $preparedRoute = $this->generateRegex($dict['params'][0]);
+
+                if($preparedRoute[1] == $parsedRoute[1] && isset($parsedRoute[2]) && isset($preparedRoute[2])) {
+                    $method = $dict;
+                }
+            }
         }
-        $this->{strtolower($name)}[$this->formatRoute($route)] = $method;
+        else $method = $methodDictionary[$formattedRoute];
+
+        if(!is_null($method)) {
+            echo call_user_func_array($method['method'], [$this->request]);
+        }
     }
 
     public function __destruct() {
         $this->resolve();
-    }
-
-    private function resolve() {
-        $methodDictionary = $this->{strtolower($this->request->requestMethod)};
-        $formattedRoute = $this->formatRoute($this->request->requestUri);
-        $method = $methodDictionary[$formattedRoute];
-        if(is_null($method))
-        {
-            $this->defaultRequestHandler();
-            return;
-        }
-        echo call_user_func_array($method, array($this->request));
     }
 
     private function formatRoute($route) {
@@ -47,11 +56,18 @@ class Router {
         return $result;
     }
 
-    private function invalidMethodHandler() {
-        header("{$this->request->serverProtocol} 405 Method Not Allowed");
+    private function generateRegex($route) {
+        $matches = [];
+        preg_match('/\/(\w+)\/{(\w+)}/', $route, $matches);
+
+        return $matches;
     }
 
-    private function defaultRequestHandler() {
-        header("{$this->request->serverProtocol} 404 Not Found");
+    private function resolveRoute($route) {
+        $matches = [];
+
+        preg_match('/\/(\w+)\/(\d+)/', $route, $matches);
+
+        return $matches;
     }
 }
