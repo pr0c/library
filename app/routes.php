@@ -27,7 +27,7 @@ $router->get('/book', function() {
     echo json_encode($books);
 });
 
-$router->patch('/book/{id}', function($request) {
+$router->post('/book/{id}', function($request) {
     $request = $request->getParams();
     $book = BookController::updateBook($request['id'], $request);
 
@@ -42,7 +42,6 @@ $router->delete('/book/{id}', function($request) {
 });
 
 $router->post('/book', function($request) {
-    $request = $request->getParams();
     $book = BookController::addBook($request);
 
     echo json_encode($book);
@@ -62,7 +61,7 @@ $router->get('/author', function() {
     echo json_encode($authors);
 });
 
-$router->patch('/author/{id}', function($request) {
+$router->post('/author/{id}', function($request) {
     $request = $request->getParams();
     $author = AuthorController::updateAuthor($request['id'], $request);
 
@@ -77,7 +76,6 @@ $router->delete('/author/{id}', function($request) {
 });
 
 $router->post('/author', function($request) {
-    $request = $request->getParams();
     $author = AuthorController::addAuthor($request);
 
     echo json_encode($author);

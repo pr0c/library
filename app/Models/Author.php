@@ -22,12 +22,13 @@ class Author extends Model {
     }
 
     public function updateAuthor($id, $author) {
+        $author = json_decode($author['author']);
         return $this->update($author, $id);
     }
 
     public function getBooks($id) {
-        $books = $this->belongsToMany(Book::class, $id, 'authors_books');
+        /*$books = $this->belongsToMany(Book::class, $id, 'authors_books');
 
-        return $books;
+        return $books;*/
     }
 }

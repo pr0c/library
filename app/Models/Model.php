@@ -71,7 +71,7 @@ abstract class Model {
         $result = $this->connection->prepare($query);
         $result->execute();
 
-        return $result->fetchAll();
+        return $result->fetchAll(PDO::FETCH_ASSOC);
     }
 
     protected function find($id) {
@@ -130,7 +130,9 @@ abstract class Model {
         return $newItem;
     }
 
-    protected function belongsToMany($class, $recordId, $related_table = null, $related_key = null) {
+    protected function belongsToMany($class, $recordId, $related_table, $related_key = null, $reverse_key = null) {
+        $class = new $class();
+
         if(is_null($related_table)) {
             $related_table = sprintf('%s_%s', $class->table, $this->table);
         }
@@ -139,13 +141,17 @@ abstract class Model {
             $related_key = sprintf('%s_id', rtrim($this->table, 's'));
         }
 
+        if(is_null($reverse_key)) {
+            $reverse_key = sprintf('%s_id', rtrim($class->table, 's'));
+        }
+
         $result = $this->query(sprintf("SELECT * FROM `%s` WHERE `%s` = %d", $related_table, $related_key, $recordId));
         $result = $result->fetchAll(PDO::FETCH_ASSOC);
 
         $records = [];
-        foreach($result as $id) {
-            $tmp = $this->query(sprintf("SELECT * FROM `%s` WHERE `%s` = %d", $class->table, $class->primary_key, $id));
-            $records[] = $tmp->fetchAll(PDO::FETCH_ASSOC);
+        foreach($result as $record) {
+            $tmp = $this->query(sprintf("SELECT * FROM `%s` WHERE `%s` = %d", $class->table, $class->primary_key, $record[$reverse_key]));
+            $records[] = $tmp->fetchAll(PDO::FETCH_ASSOC)[0];
         }
 
         return $records;

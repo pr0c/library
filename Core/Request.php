@@ -23,11 +23,11 @@ class Request {
 
             foreach($_POST as $key => $value)
             {
-                $params[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
+                $params[$key] = filter_input(INPUT_POST, $key);
             }
 
             $pattern = $this->resolveRoute($_SERVER['REQUEST_URI']);
-            if($pattern[2]) {
+            if(isset($pattern[2])) {
                 $params['id'] = $pattern[2];
             }
 
@@ -39,21 +39,6 @@ class Request {
             $params = [
                 'id' => $pattern[2] ?: null
             ];
-            return $params;
-        }
-        else if($this->requestMethod == "PATCH") {
-            $params = [];
-
-            foreach($_POST as $key => $value)
-            {
-                $params[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
-            }
-
-            $pattern = $this->resolveRoute($_SERVER['REQUEST_URI']);
-            if($pattern[2]) {
-                $params['id'] = $pattern[2];
-            }
-
             return $params;
         }
     }
